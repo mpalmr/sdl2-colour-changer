@@ -111,7 +111,7 @@ fn run() -> Result<(), String> {
 
 fn main() {
     if let Err(error) = run() {
-        println!("Error: {}", error);
+        eprintln!("Error: {}", error);
         std::process::exit(1);
     }
 }
