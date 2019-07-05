@@ -1,0 +1,10 @@
+[package]
+name = "sdl-tutorial"
+version = "0.1.0"
+authors = ["Matthew Palmer <mspalmer91@gmail.com>"]
+edition = "2018"
+
+[dependencies.sdl2]
+version = "0.32.2"
+default-features = false
+features = []
