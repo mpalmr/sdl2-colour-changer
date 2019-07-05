@@ -8,6 +8,7 @@ use std::time::Duration;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
+use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
@@ -15,11 +16,39 @@ type RGBValue = [u8; 3];
 
 static WINDOW_WIDTH: u32 = 800;
 static WINDOW_HEIGHT: u32 = 600;
+static INDICATOR_SIZE: u32 = 50;
+
+macro_rules! rect(
+    ($x: expr, $y: expr, $w: expr, $h: expr) => (
+        Rect::new($x as i32, $y as i32, $w as u32, $h as u32)
+    )
+);
 
 fn update_bg(canvas: &mut Canvas<Window>, bg_color: RGBValue) {
     canvas.set_draw_color(Color::RGB(bg_color[0], bg_color[1], bg_color[2]));
     canvas.clear();
     canvas.present();
+}
+
+fn update_color_indicator(
+    canvas: &mut Canvas<Window>,
+    bg_color_index: usize,
+) -> Result<(), String> {
+    let color: RGBValue = match bg_color_index {
+        0 => [255, 0, 0],
+        1 => [0, 255, 0],
+        2 => [0, 0, 255],
+        _ => panic!("invalid colour index."),
+    };
+    canvas.set_draw_color(Color::RGB(color[0], color[1], color[2]));
+    canvas.fill_rect(rect!(
+        WINDOW_WIDTH - INDICATOR_SIZE,
+        WINDOW_HEIGHT - INDICATOR_SIZE,
+        INDICATOR_SIZE,
+        INDICATOR_SIZE
+    ))?;
+    canvas.present();
+    Ok(())
 }
 
 fn run() -> Result<(), String> {
@@ -43,7 +72,7 @@ fn run() -> Result<(), String> {
     update_bg(&mut canvas, bg_color);
 
     let mut event_pump = sdl_context.event_pump()?;
-    let mut bg_color_index = 0;
+    let mut bg_color_index: usize = 0;
 
     'mainloop: loop {
         for event in event_pump.poll_iter() {
@@ -80,6 +109,7 @@ fn run() -> Result<(), String> {
                     } else {
                         bg_color_index = 0;
                     }
+                    update_color_indicator(&mut canvas, bg_color_index)?;
                 }
                 Event::KeyDown {
                     keycode: Some(Keycode::Left),
@@ -90,6 +120,7 @@ fn run() -> Result<(), String> {
                     } else {
                         bg_color_index = 2;
                     }
+                    update_color_indicator(&mut canvas, bg_color_index)?;
                 }
 
                 // Quits the program
@@ -103,7 +134,7 @@ fn run() -> Result<(), String> {
             }
         }
 
-        sleep(Duration::new(0, 1000));
+        sleep(Duration::new(0, 50_000_000));
     }
 
     Ok(())
