@@ -17,6 +17,7 @@ type RGBValue = [u8; 3];
 static WINDOW_WIDTH: u32 = 800;
 static WINDOW_HEIGHT: u32 = 600;
 static INDICATOR_SIZE: u32 = 50;
+static COLOR_STEP_SIZE: u8 = 5;
 
 macro_rules! rect(
     ($x: expr, $y: expr, $w: expr, $h: expr) => (
@@ -85,7 +86,7 @@ fn run() -> Result<(), String> {
                     ..
                 } => {
                     if bg_color[bg_color_index] < 255 {
-                        bg_color[bg_color_index] += 5;
+                        bg_color[bg_color_index] += COLOR_STEP_SIZE;
                         redraw(&mut canvas, bg_color, bg_color_index)?;
                     }
                 }
@@ -96,7 +97,7 @@ fn run() -> Result<(), String> {
                     ..
                 } => {
                     if bg_color[bg_color_index] > 0 {
-                        bg_color[bg_color_index] -= 5;
+                        bg_color[bg_color_index] -= COLOR_STEP_SIZE;
                         redraw(&mut canvas, bg_color, bg_color_index)?;
                     }
                 }
