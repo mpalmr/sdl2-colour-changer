@@ -24,12 +24,6 @@ macro_rules! rect(
     )
 );
 
-fn update_bg(canvas: &mut Canvas<Window>, bg_color: RGBValue) {
-    canvas.set_draw_color(Color::RGB(bg_color[0], bg_color[1], bg_color[2]));
-    canvas.clear();
-    canvas.present();
-}
-
 fn update_color_indicator(
     canvas: &mut Canvas<Window>,
     bg_color_index: usize,
@@ -47,20 +41,20 @@ fn update_color_indicator(
         INDICATOR_SIZE,
         INDICATOR_SIZE
     ))?;
-    canvas.present();
     Ok(())
 }
 
 fn run() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
-
+    let mut needs_bg_redraw = false;
+    let mut bg_color: RGBValue = [0, 0, 0];
+    let mut bg_color_index: usize = 0;
     let window = video_subsystem
         .window("SDL Tutorial", WINDOW_WIDTH, WINDOW_HEIGHT)
         .position_centered()
         .build()
         .map_err(|e| e.to_string())?;
-
     let mut canvas = window
         .into_canvas()
         .target_texture()
@@ -68,12 +62,12 @@ fn run() -> Result<(), String> {
         .build()
         .map_err(|e| e.to_string())?;
 
-    let mut bg_color: RGBValue = [0, 0, 0];
-    update_bg(&mut canvas, bg_color);
+    canvas.clear();
+    canvas.set_draw_color(Color::RGB(bg_color[0], bg_color[1], bg_color[2]));
+    update_color_indicator(&mut canvas, bg_color_index)?;
+    canvas.present();
 
     let mut event_pump = sdl_context.event_pump()?;
-    let mut bg_color_index: usize = 0;
-
     'mainloop: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -83,8 +77,8 @@ fn run() -> Result<(), String> {
                     ..
                 } => {
                     if bg_color[bg_color_index] < 255 {
+                        needs_bg_redraw = true;
                         bg_color[bg_color_index] += 5;
-                        update_bg(&mut canvas, bg_color);
                     }
                 }
 
@@ -94,8 +88,8 @@ fn run() -> Result<(), String> {
                     ..
                 } => {
                     if bg_color[bg_color_index] > 0 {
+                        needs_bg_redraw = true;
                         bg_color[bg_color_index] -= 5;
-                        update_bg(&mut canvas, bg_color);
                     }
                 }
 
@@ -110,6 +104,7 @@ fn run() -> Result<(), String> {
                         bg_color_index = 0;
                     }
                     update_color_indicator(&mut canvas, bg_color_index)?;
+                    canvas.present();
                 }
                 Event::KeyDown {
                     keycode: Some(Keycode::Left),
@@ -121,6 +116,7 @@ fn run() -> Result<(), String> {
                         bg_color_index = 2;
                     }
                     update_color_indicator(&mut canvas, bg_color_index)?;
+                    canvas.present();
                 }
 
                 // Quits the program
@@ -132,6 +128,14 @@ fn run() -> Result<(), String> {
 
                 _ => {}
             }
+        }
+
+        if needs_bg_redraw {
+            needs_bg_redraw = false;
+            canvas.set_draw_color(Color::RGB(bg_color[0], bg_color[1], bg_color[2]));
+            canvas.clear();
+            update_color_indicator(&mut canvas, bg_color_index)?;
+            canvas.present();
         }
 
         sleep(Duration::new(0, 50_000_000));
