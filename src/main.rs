@@ -33,7 +33,7 @@ fn update_color_indicator(
 		0 => [255, 0, 0],
 		1 => [0, 255, 0],
 		2 => [0, 0, 255],
-		_ => panic!("invalid color index"),
+		_ => return Err(String::from("invalid color index")),
 	};
 	canvas.set_draw_color(Color::RGB(color[0], color[1], color[2]));
 	canvas.fill_rect(rect!(
