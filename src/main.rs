@@ -44,7 +44,11 @@ fn update_color_indicator(
     Ok(())
 }
 
-fn redraw(canvas: &mut Canvas<Window>, bg_color: RGBValue, bg_color_index: usize) -> Result<(), String> {
+fn redraw(
+    canvas: &mut Canvas<Window>,
+    bg_color: RGBValue,
+    bg_color_index: usize,
+) -> Result<(), String> {
     canvas.set_draw_color(Color::RGB(bg_color[0], bg_color[1], bg_color[2]));
     canvas.clear();
     update_color_indicator(canvas, bg_color_index)?;
@@ -126,6 +130,10 @@ fn run() -> Result<(), String> {
                 // Quits the program
                 Event::KeyDown {
                     keycode: Some(Keycode::Escape),
+                    ..
+                }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Q),
                     ..
                 }
                 | Event::Quit { .. } => break 'mainloop,
