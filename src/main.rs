@@ -32,7 +32,7 @@ fn update_color_indicator(
         0 => [255, 0, 0],
         1 => [0, 255, 0],
         2 => [0, 0, 255],
-        _ => panic!("invalid colour index."),
+        _ => panic!("invalid colour index"),
     };
     canvas.set_draw_color(Color::RGB(color[0], color[1], color[2]));
     canvas.fill_rect(rect!(
@@ -58,6 +58,7 @@ fn redraw(
 
 fn run() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
+    let mut event_pump = sdl_context.event_pump()?;
     let video_subsystem = sdl_context.video()?;
     let window = video_subsystem
         .window("SDL Tutorial", WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -75,7 +76,6 @@ fn run() -> Result<(), String> {
     let mut bg_color_index: usize = 0;
     redraw(&mut canvas, bg_color, bg_color_index)?;
 
-    let mut event_pump = sdl_context.event_pump()?;
     'mainloop: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -127,6 +127,15 @@ fn run() -> Result<(), String> {
                     canvas.present();
                 }
 
+                // Resets to black
+                Event::KeyDown {
+                    keycode: Some(Keycode::Space),
+                    ..
+                } => {
+                    bg_color = [0, 0, 0];
+                    redraw(&mut canvas, bg_color, bg_color_index)?;
+                }
+
                 // Quits the program
                 Event::KeyDown {
                     keycode: Some(Keycode::Escape),
@@ -138,11 +147,10 @@ fn run() -> Result<(), String> {
                 }
                 | Event::Quit { .. } => break 'mainloop,
 
-                _ => {}
+                // Sleep so 20 events can happen per second
+                _ => sleep(Duration::new(0, 50_000_000)),
             }
         }
-
-        sleep(Duration::new(0, 50_000_000));
     }
 
     Ok(())
